@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ExchangeConverter</string>
+    <string name="converter_title">Rates</string>
+</resources>
