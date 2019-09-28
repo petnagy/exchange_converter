@@ -5,16 +5,22 @@ import com.petnagy.exchangeconverter.common.recyclerview.ListItemViewModel
 import com.petnagy.exchangeconverter.data.domainobject.Rate
 
 /***
- * ListItemViewModel for Rate Item.
+ * ListItemViewModel for Currency Item.
  */
-class RateListItemViewModel(rate: Rate) : ListItemViewModel() {
+class RateListItemViewModel(private val rate: Rate) : ListItemViewModel() {
 
-    val currency = rate.currency
+    val flag = rate.currency.flagResId
+    val currency = rate.currency.name
+    val nameOfCurrency = rate.currency.currencyName
     val numberOfRate = rate.rate.toString()
 
     override fun getViewType() = R.layout.list_item_rate
 
-    override fun areItemsTheSame(newItem: ListItemViewModel) = false
+    override fun areItemsTheSame(newItem: ListItemViewModel) =
+        isSame(newItem as RateListItemViewModel)
 
-    override fun areContentsTheSame(newItem: ListItemViewModel) = false
+    override fun areContentsTheSame(newItem: ListItemViewModel) =
+        isSame(newItem as RateListItemViewModel)
+
+    private fun isSame(other: RateListItemViewModel) = this.rate.currency == other.rate.currency
 }
