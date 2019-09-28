@@ -18,13 +18,15 @@ import java.util.concurrent.TimeUnit
 /***
  * ViewModel for ConverterActivity.
  */
-class ConverterViewModel(private val model: ConverterModel) : ViewModel(), LifecycleObserver {
+class ConverterViewModel(private val model: ConverterModel) : ViewModel(), LifecycleObserver,
+    OnCurrencyClickedListener {
 
     private lateinit var disposable: Disposable
     val listOfRates =
         MutableLiveData<List<ListItemViewModel>>().default(emptyList<RateListItemViewModel>())
 
     private var baseCurrency = Currency.EUR
+    private var baseAmount = BigDecimal.ONE
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun startPolling() {
@@ -65,10 +67,21 @@ class ConverterViewModel(private val model: ConverterModel) : ViewModel(), Lifec
     }
 
     private fun convertToRateList(apiObject: ApiRateExcahnge): List<RateListItemViewModel> {
-        val baseRate = Rate(baseCurrency, BigDecimal.ONE)
+        val baseRate = Rate(baseCurrency, baseAmount)
         val rateList =
-            apiObject.rates.filter { it.key.visible }.map { Rate(it.key, it.value) }.toMutableList()
+            apiObject.rates.filter { it.key.visible }
+                .map { Rate(it.key, it.value.multiply(baseAmount)) }.toMutableList()
         rateList.add(0, baseRate)
-        return rateList.map { RateListItemViewModel(it) }.toList()
+        return rateList.map { RateListItemViewModel(it, this) }.toList()
     }
+
+    override fun onCurrencySelected(currency: Currency, amount: BigDecimal) {
+        baseCurrency = currency
+        baseAmount = amount
+        // TODO change the sort of the list
+    }
+}
+
+interface OnCurrencyClickedListener {
+    fun onCurrencySelected(currency: Currency, amount: BigDecimal)
 }
