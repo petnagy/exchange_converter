@@ -4,6 +4,7 @@ import android.view.View
 import com.petnagy.exchangeconverter.R
 import com.petnagy.exchangeconverter.common.recyclerview.ListItemViewModel
 import com.petnagy.exchangeconverter.data.domainobject.Rate
+import java.text.DecimalFormat
 
 /***
  * ListItemViewModel for Currency Item.
@@ -13,10 +14,14 @@ class RateListItemViewModel(
     private val callback: OnCurrencyClickedListener
 ) : ListItemViewModel() {
 
+    companion object {
+        val formatter = DecimalFormat("###,###.##")
+    }
+
     val flag = rate.currency.flagResId
     val currency = rate.currency.name
     val nameOfCurrency = rate.currency.currencyName
-    val numberOfRate = rate.rate.toString()
+    val numberOfRate: String = formatter.format(rate.rate)
 
     override fun getViewType() = R.layout.list_item_rate
 

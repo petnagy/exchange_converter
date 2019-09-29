@@ -76,9 +76,33 @@ class ConverterViewModel(private val model: ConverterModel) : ViewModel(), Lifec
     }
 
     override fun onCurrencySelected(currency: Currency, amount: BigDecimal) {
-        baseCurrency = currency
-        baseAmount = amount
-        // TODO change the sort of the list
+        if (currency != baseCurrency) {
+            swapCurrencies(currency, amount)
+            baseCurrency = currency
+            baseAmount = amount
+        }
+    }
+
+    private fun swapCurrencies(currency: Currency, amount: BigDecimal) {
+        val list = listOfRates.value?.toMutableList()
+        list?.let { currencyList ->
+            // val newBaseCurrency = RateListItemViewModel(Rate(currency, amount), this)
+            val oldBaseCurrency = currencyList[0]
+            currencyList.remove(oldBaseCurrency)
+            val newCurrencyOldIndex = currencyList.indexOfFirst { listItem ->
+                listItem as RateListItemViewModel
+                listItem.currency == currency.name
+            }
+            val newBaseCurrency = currencyList[newCurrencyOldIndex]
+            currencyList.remove(newBaseCurrency)
+            if (baseCurrency == Currency.EUR) {
+                currencyList.add(oldBaseCurrency)
+            } else {
+                currencyList.add(newCurrencyOldIndex, oldBaseCurrency)
+            }
+            currencyList.add(0, newBaseCurrency)
+            listOfRates.value = currencyList
+        }
     }
 }
 
