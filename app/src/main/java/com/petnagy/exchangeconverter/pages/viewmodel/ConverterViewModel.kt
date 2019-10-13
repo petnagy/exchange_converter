@@ -1,7 +1,10 @@
 package com.petnagy.exchangeconverter.pages.viewmodel
 
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.lifecycle.*
 import com.petnagy.exchangeconverter.common.extensions.default
+import com.petnagy.exchangeconverter.common.extensions.safeValue
 import com.petnagy.exchangeconverter.common.recyclerview.ListItemViewModel
 import com.petnagy.exchangeconverter.data.Currency
 import com.petnagy.exchangeconverter.data.apiobject.ApiRateExcahnge
@@ -13,6 +16,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import java.math.BigDecimal
+import java.text.DecimalFormat
 import java.util.concurrent.TimeUnit
 
 /***
@@ -25,14 +29,46 @@ class ConverterViewModel(private val model: ConverterModel) : ViewModel(), Lifec
     val listOfRates =
         MutableLiveData<List<ListItemViewModel>>().default(emptyList<RateListItemViewModel>())
 
-    private var baseCurrency = Currency.EUR
+    val baseFlag = MutableLiveData<Int>().default(Currency.EUR.flagResId)
+    val baseCurrency = MutableLiveData<String>().default(Currency.EUR.name)
+    val nameOfBaseCurrency = MutableLiveData<Int>().default(Currency.EUR.currencyName)
+    val baseRate = MutableLiveData<String>().default(BigDecimal.ONE.toString())
+
+    private var actualCurrency = Currency.EUR
     private var baseAmount = BigDecimal.ONE
+    private val formatter = DecimalFormat("###,###.##")
+
+    val amountChange = object:  TextWatcher {
+        override fun afterTextChanged(editable: Editable?) {
+            val text = editable?.toString() ?: ""
+            val clearedText = text.replace(",", "")
+            val amountText = if (clearedText.isEmpty()) "0" else clearedText
+            baseAmount = BigDecimal(amountText)
+            baseRate.value = formatter.format(baseAmount)
+
+            model.getExchangeRates(actualCurrency.name)
+                .map { convertToRateList(it) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { result -> handleExchangeRates(result) },
+                    { error -> handleError(error) })
+        }
+
+        override fun beforeTextChanged(text: CharSequence?, start: Int, count: Int, after: Int) {
+            // not implemented
+        }
+
+        override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {
+            // not implemented
+        }
+    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun startPolling() {
         disposable =
             Observable.interval(1, TimeUnit.SECONDS)
-                .flatMap { model.getExchangeRates(baseCurrency.name).toObservable() }
+                .flatMap { model.getExchangeRates(actualCurrency.name).toObservable() }
                 .map { convertToRateList(it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -67,42 +103,26 @@ class ConverterViewModel(private val model: ConverterModel) : ViewModel(), Lifec
     }
 
     private fun convertToRateList(apiObject: ApiRateExcahnge): List<RateListItemViewModel> {
-        val baseRate = Rate(baseCurrency, baseAmount)
-        val rateList =
-            apiObject.rates.filter { it.key.visible }
-                .map { Rate(it.key, it.value.multiply(baseAmount)) }.toMutableList()
-        rateList.add(0, baseRate)
-        return rateList.map { RateListItemViewModel(it, this) }.toList()
+        return apiObject.rates.filter { it.key.visible }
+            .map { Rate(it.key, it.value.multiply(baseAmount)) }
+            .map { RateListItemViewModel(it, this) }
+            .toList()
     }
 
     override fun onCurrencySelected(currency: Currency, amount: BigDecimal) {
-        if (currency != baseCurrency) {
-            swapCurrencies(currency, amount)
-            baseCurrency = currency
-            baseAmount = amount
-        }
-    }
+        baseFlag.value = currency.flagResId
+        baseCurrency.value = currency.name
+        nameOfBaseCurrency.value = currency.currencyName
+        baseRate.value = formatter.format(amount)
 
-    private fun swapCurrencies(currency: Currency, amount: BigDecimal) {
-        val list = listOfRates.value?.toMutableList()
-        list?.let { currencyList ->
-            // val newBaseCurrency = RateListItemViewModel(Rate(currency, amount), this)
-            val oldBaseCurrency = currencyList[0]
-            currencyList.remove(oldBaseCurrency)
-            val newCurrencyOldIndex = currencyList.indexOfFirst { listItem ->
-                listItem as RateListItemViewModel
-                listItem.currency == currency.name
-            }
-            val newBaseCurrency = currencyList[newCurrencyOldIndex]
-            currencyList.remove(newBaseCurrency)
-            if (baseCurrency == Currency.EUR) {
-                currencyList.add(oldBaseCurrency)
-            } else {
-                currencyList.add(newCurrencyOldIndex, oldBaseCurrency)
-            }
-            currencyList.add(0, newBaseCurrency)
-            listOfRates.value = currencyList
-        }
+        val list = listOfRates.safeValue(emptyList())
+            .filter { (it as RateListItemViewModel).currency != currency.name }.toMutableList()
+        list.add(RateListItemViewModel(Rate(currency, amount), this))
+        list.sortWith(compareBy { (it as RateListItemViewModel).rate.currency.ordinal })
+        listOfRates.value = list
+
+        actualCurrency = currency
+        baseAmount = amount
     }
 }
 

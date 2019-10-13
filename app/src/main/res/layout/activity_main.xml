@@ -34,6 +34,71 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/base_currency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/converter_toolbar" >
+
+            <ImageView
+                android:id="@+id/base_rate_flag"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                bind:image="@{viewModel.baseFlag}"
+                tools:src="@drawable/ic_us" />
+
+            <TextView
+                android:id="@+id/base_rate_currency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@{viewModel.baseCurrency}"
+                android:textColor="@android:color/black"
+                android:textFontWeight="500"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/base_rate_flag"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="USD" />
+
+            <TextView
+                android:id="@+id/base_rate_currency_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="16dp"
+                android:textColor="#8B959E"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/base_rate_flag"
+                bind:text="@{viewModel.nameOfBaseCurrency}"
+                tools:text="US Dollar" />
+
+            <EditText
+                android:id="@+id/base_rate_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:inputType="numberDecimal"
+                android:text="@{viewModel.baseRate}"
+                android:textFontWeight="500"
+                android:textSize="20sp"
+                android:textAlignment="textEnd"
+                android:textColor="#191C1F"
+                bind:onTextChange="@{viewModel.amountChange}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="1000.0" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/converter_list"
             android:layout_width="match_parent"
@@ -42,7 +107,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/converter_toolbar" />
+            app:layout_constraintTop_toBottomOf="@+id/base_currency" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

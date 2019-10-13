@@ -10,7 +10,7 @@ import java.text.DecimalFormat
  * ListItemViewModel for Currency Item.
  */
 class RateListItemViewModel(
-    private val rate: Rate,
+    val rate: Rate,
     private val callback: OnCurrencyClickedListener
 ) : ListItemViewModel() {
 
