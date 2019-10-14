@@ -7,6 +7,35 @@
     <string name="SEK">Swedish Krona</string>
     <string name="CAD">Canadian Dollar</string>
     <string name="HUF">Hungarian Forint</string>
+    <string name="AUD">Australian Dollar</string>
+    <string name="BGN">Bulgarian lev</string>
+    <string name="BRL">Brazilian real</string>
+    <string name="CHF">Swiss franc</string>
+    <string name="CNY">Renminbi</string>
+    <string name="CZK">Czech koruna</string>
+    <string name="DKK">Danish krone</string>
+    <string name="GBP">Pound sterling</string>
+    <string name="HKD">Hong Kong dollar</string>
+    <string name="HRK">Croatian kuna</string>
+    <string name="IDR">Indonesian rupiah</string>
+    <string name="ILS">Israeli new shekel</string>
+    <string name="INR">Indian rupee</string>
+    <string name="ISK">Icelandic króna</string>
+    <string name="JPY">Japanese yen</string>
+    <string name="KRW">South Korean won</string>
+    <string name="MXN">Mexican peso</string>
+    <string name="MYR">Malaysian ringgit</string>
+    <string name="NOK">Norwegian krone</string>
+    <string name="NZD">New Zealand dollar</string>
+    <string name="PHP">Philippine peso</string>
+    <string name="PLN">Polish złoty</string>
+    <string name="RON">Romanian leu</string>
+    <string name="RUB">Russian ruble</string>
+    <string name="SGD">Singapore dollar</string>
+    <string name="THB">Thai baht</string>
+    <string name="TRY">Turkish lira</string>
+    <string name="ZAR">South African rand</string>
+
     <string name="no_name">unknown</string>
     
 </resources>
